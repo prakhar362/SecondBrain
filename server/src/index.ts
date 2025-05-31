@@ -1,15 +1,15 @@
 import express from "express";
-import mongoose from 'mongoose';
-import 'dotenv/config';
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.resolve(__dirname, "../.env") }); 
 
 const app = express();
 
-// Middleware (if needed)
-// app.use(express.json());
-
 // Routes
 app.get('/', (req, res) => {
-    res.send("Server working test");
+    res.send("Server working ! Hello from server");
 });
 
 app.post("/api/v1/signup", (req, res) => {
@@ -40,30 +40,24 @@ app.get("/api/v1/brain/:sharLink", (req, res) => {
     res.send(`Brain link for ${req.params.sharLink}`);
 });
 
-// Define the port
+
 const port = process.env.PORT || 3000;
-console.log("PORT",process.env.PORT )
-
-// MongoDB connection and server start
 async function main() {
-    try {
-        const mongoUrl = process.env.MONGO_URL;
-
-        if (!mongoUrl) {
-            throw new Error("MONGO_URL is not defined in environment variables");
-        }
-
-        await mongoose.connect(mongoUrl as string);
-        console.log("Connected to MongoDB");
-
-        app.listen(port, () => {
-            console.log(`Server running at http://localhost:${port}`);
-        });
-
-    } catch (error: any) {
-        console.error("Error connecting to MongoDB:", error.message);
-        process.exit(1);
+  try {
+    if (!process.env.MONGO_URL) {
+      throw new Error("MONGO_URL is not defined in environment variables");
     }
+
+    await mongoose.connect(process.env.MONGO_URL);
+    console.log("MongoDB Connection successful");
+
+    app.listen(port, () => {
+      console.log(`Server running at http://localhost:${port}`);
+    });
+  } catch (err: any) {
+    console.error("Error:", err.message);
+    process.exit(1);
+  }
 }
 
 main();
