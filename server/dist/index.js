@@ -17,6 +17,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const zod_1 = require("zod");
 const dotenv_1 = __importDefault(require("dotenv"));
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const path_1 = __importDefault(require("path"));
 const db_1 = require("./db");
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, "../.env") });
@@ -63,9 +64,25 @@ app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
         return res.status(500).json({ error: "Server error" });
     }
 }));
-app.post("/api/v1/login", (req, res) => {
-    res.send("Login route");
-});
+app.post("/api/v1/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const useremail = req.body.email;
+    const password = req.body.password;
+    //find both username and email in DB:
+    const user = yield db_1.UserModel.findOne({
+        email: useremail,
+    });
+    if (!user) {
+        return res.status(403).json({ error: "Wrong email or password" });
+    }
+    const passwordMatch = bcrypt_1.default.compareSync(password, user.password);
+    if (passwordMatch) {
+        const token = jsonwebtoken_1.default.sign({ userId: user._id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token });
+    }
+    else {
+        return res.status(403).json({ error: "Wrong email or password" });
+    }
+}));
 app.post("/api/v1/content", (req, res) => {
     res.send("Content POST route");
 });

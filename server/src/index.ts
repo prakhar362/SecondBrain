@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import bcrypt from 'bcrypt';
 import { z } from "zod";
 import dotenv from "dotenv";
+import jwt from 'jsonwebtoken';
 import path from "path";
 import { UserModel } from "./db";
 
@@ -60,9 +61,33 @@ app.post("/api/v1/signup", async (req:any, res:any) => {
 });
 
 
-app.post("/api/v1/login", (req, res) => {
-  
-    res.send("Login route");
+app.post("/api/v1/login", async (req:any, res:any) => {
+  const useremail=req.body.email;
+  const password=req.body.password;
+
+  //find both username and email in DB:
+  const user=await UserModel.findOne({
+    email:useremail,
+  });
+
+   if(!user)
+   {
+    return res.status(403).json({ error: "Wrong email or password" });
+   }
+ 
+  const passwordMatch=bcrypt.compareSync(password,user.password)
+  if(passwordMatch)
+  {
+    const token = jwt.sign(
+      { userId: user._id, username: user.username },
+      process.env.JWT_SECRET!,
+      { expiresIn: '1h' }
+    );
+    res.json({token});
+  }
+  else{
+    return res.status(403).json({ error: "Wrong email or password" });
+  }
 });
 
 app.post("/api/v1/content", (req, res) => {
