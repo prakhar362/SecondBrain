@@ -20,6 +20,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const path_1 = __importDefault(require("path"));
 const db_1 = require("./db");
+const crypto_1 = require("crypto");
 const middleware_1 = require("./middleware");
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, "../.env") });
 const app = (0, express_1.default)();
@@ -109,18 +110,82 @@ app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter
         res.status(500).json({ error: "Server error" });
     }
 }));
-app.get("/api/v1/content", (req, res) => {
-    res.send("Content GET route");
-});
-app.delete("/api/v1/content", (req, res) => {
-    res.send("Content DELETE route");
-});
-app.post("/api/v1/brain/share", (req, res) => {
-    res.send("Brain share route");
-});
-app.get("/api/v1/brain/:sharLink", (req, res) => {
-    res.send(`Brain link for ${req.params.sharLink}`);
-});
+app.get("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    //@ts-ignore
+    const userId = req.userId;
+    const content = yield db_1.ContentModel.find({ userId: userId }).populate("userId", "username");
+    res.send({ content });
+}));
+app.delete("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { contentId } = req.body;
+        // @ts-ignore
+        const userId = req.userId;
+        if (!contentId) {
+            return res.status(400).json({ error: "Content ID is required" });
+        }
+        const result = yield db_1.ContentModel.deleteOne({ _id: contentId, userId });
+        if (result.deletedCount === 0) {
+            return res.status(404).json({ message: "Content not found or unauthorized" });
+        }
+        res.json({ message: "Deleted successfully" });
+    }
+    catch (error) {
+        console.error("Delete error:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+}));
+function random(length) {
+    return (0, crypto_1.randomBytes)(length).toString("hex").slice(0, length);
+}
+app.post("/api/v1/brain/share", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const contentId = req.body.contentId;
+        const share = req.body.share;
+        // @ts-ignore
+        const userId = req.userId;
+        if (!contentId || typeof share !== "boolean") {
+            return res.status(400).json({ error: "contentId and share flag are required" });
+        }
+        if (share) {
+            // Check if link already exists for this content and user
+            const existingLink = yield db_1.LinkModel.findOne({ userId, contentId });
+            if (existingLink) {
+                return res.json({ hash: existingLink.hash });
+            }
+            const hash = random(10);
+            yield db_1.LinkModel.create({ userId, contentId, hash });
+            return res.json({ hash });
+        }
+        else {
+            yield db_1.LinkModel.deleteOne({ userId, contentId });
+            return res.json({ message: "Link removed" });
+        }
+    }
+    catch (error) {
+        console.error("Share link error:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+}));
+app.get("/api/v1/brain/share/:hash", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { hash } = req.params;
+        console.log("Received hash: ", hash);
+        const link = yield db_1.LinkModel.findOne({ hash });
+        if (!link) {
+            return res.status(404).json({ error: "Invalid or expired link" });
+        }
+        const content = yield db_1.ContentModel.findOne({ _id: link.contentId });
+        if (!content) {
+            return res.status(404).json({ error: "Content not found" });
+        }
+        res.json({ content });
+    }
+    catch (error) {
+        console.error("Shared content error:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+}));
 const port = process.env.PORT || 3000;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {

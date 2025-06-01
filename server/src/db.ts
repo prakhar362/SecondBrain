@@ -21,6 +21,7 @@ const ContentSchema=new Schema({
 
 const LinkSchema=new Schema({
    hash: { type: String, required: true },
+   contentId: { type: Types.ObjectId, ref: "Content", required: true },
   userId: { type: Types.ObjectId, ref: "users", required: true },
     })
 

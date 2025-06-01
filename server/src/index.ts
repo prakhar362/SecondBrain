@@ -5,7 +5,8 @@ import { z } from "zod";
 import dotenv from "dotenv";
 import jwt from 'jsonwebtoken';
 import path from "path";
-import { ContentModel, UserModel } from "./db";
+import { ContentModel, UserModel,LinkModel,TagModel } from "./db";
+import { randomBytes } from "crypto";
 import { userMiddleware } from "./middleware";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") }); 
@@ -120,21 +121,98 @@ app.post("/api/v1/content",userMiddleware, async (req:any, res:any) => {
     }
 });
 
-app.get("/api/v1/content", (req, res) => {
-    res.send("Content GET route");
+app.get("/api/v1/content",userMiddleware, async(req, res) => {
+
+  //@ts-ignore
+  const userId=req.userId;
+  const content = await ContentModel.find({ userId: userId }).populate("userId", "username");
+
+    res.send({content});
 });
 
-app.delete("/api/v1/content", (req, res) => {
-    res.send("Content DELETE route");
+app.delete("/api/v1/content", userMiddleware, async (req:any, res:any) => {
+  try {
+    const { contentId } = req.body;
+    // @ts-ignore
+    const userId = req.userId;
+
+    if (!contentId) {
+      return res.status(400).json({ error: "Content ID is required" });
+    }
+
+    const result = await ContentModel.deleteOne({ _id: contentId, userId });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Content not found or unauthorized" });
+    }
+
+    res.json({ message: "Deleted successfully" });
+  } catch (error) {
+    console.error("Delete error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-app.post("/api/v1/brain/share", (req, res) => {
-    res.send("Brain share route");
+
+function random(length: number): string {
+  return randomBytes(length).toString("hex").slice(0, length);
+}
+
+app.post("/api/v1/brain/share", userMiddleware, async (req:any, res:any) => {
+  try {
+    const contentId  = req.body.contentId;
+    const share=req.body.share;
+
+    // @ts-ignore
+    const userId = req.userId;
+
+    if (!contentId || typeof share !== "boolean") {
+      return res.status(400).json({ error: "contentId and share flag are required" });
+    }
+
+    if (share) {
+      // Check if link already exists for this content and user
+      const existingLink = await LinkModel.findOne({ userId, contentId });
+      if (existingLink) {
+        return res.json({ hash: existingLink.hash });
+      }
+
+      const hash = random(10);
+      await LinkModel.create({ userId, contentId, hash });
+      return res.json({ hash });
+    } else {
+      await LinkModel.deleteOne({ userId, contentId });
+      return res.json({ message: "Link removed" });
+    }
+  } catch (error) {
+    console.error("Share link error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
-app.get("/api/v1/brain/:sharLink", (req, res) => {
-    res.send(`Brain link for ${req.params.sharLink}`);
+
+app.get("/api/v1/brain/share/:hash", async (req:any, res:any) => {
+  try {
+    const { hash } = req.params;
+    console.log("Received hash: ",hash);
+
+    const link = await LinkModel.findOne({ hash });
+    if (!link) {
+      return res.status(404).json({ error: "Invalid or expired link" });
+    }
+
+    const content = await ContentModel.findOne({ _id: link.contentId });
+    if (!content) {
+      return res.status(404).json({ error: "Content not found" });
+    }
+
+    res.json({ content });
+  } catch (error) {
+    console.error("Shared content error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 });
+
 
 
 const port = process.env.PORT || 3000;
