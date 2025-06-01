@@ -91,6 +91,10 @@ app.post("/api/v1/login", async (req:any, res:any) => {
 });
 
 app.post("/api/v1/content", (req, res) => {
+  const link=req.body.link;
+  const type=req.body.type;
+  const title=req.body.title;
+  //find user id from middlewares
     res.send("Content POST route");
 });
 
