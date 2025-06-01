@@ -1,22 +1,67 @@
 import express from "express";
 import mongoose from "mongoose";
+import bcrypt from 'bcrypt';
+import { z } from "zod";
 import dotenv from "dotenv";
 import path from "path";
+import { UserModel } from "./db";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") }); 
 
 const app = express();
+app.use(express.json());
+
+//zod validation
+const signupSchema = z.object({
+  username: z.string().min(3).max(32),
+  email: z.string().email(),
+  password: z
+    .string()
+    .min(8)
+    .max(20)
+    .regex(/[A-Z]/, "Must include at least one uppercase letter")
+    .regex(/[a-z]/, "Must include at least one lowercase letter")
+    .regex(/[0-9]/, "Must include at least one number")
+    .regex(/[^A-Za-z0-9]/, "Must include at least one special character"),
+});
 
 // Routes
 app.get('/', (req, res) => {
     res.send("Server working ! Hello from server");
 });
 
-app.post("/api/v1/signup", (req, res) => {
-    res.send("Signup route");
+app.post("/api/v1/signup", async (req:any, res:any) => {
+  try {
+    const result = signupSchema.safeParse(req.body);
+    if (!result.success) {
+      return res.status(411).json({ error: "Invalid input", details: result.error.format() });
+    }
+
+    const { username, email, password } = result.data;
+
+    const existingUser = await UserModel.findOne({ username });
+    if (existingUser) {
+      return res.status(403).json({ error: "User already exists with this username" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await UserModel.create({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
+    return res.status(200).json({ message: "Signed up" });
+  } catch (error) {
+    console.error("Signup Error:", error);
+    return res.status(500).json({ error: "Server error" });
+  }
 });
 
+
 app.post("/api/v1/login", (req, res) => {
+  
     res.send("Login route");
 });
 

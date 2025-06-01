@@ -14,17 +14,55 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const zod_1 = require("zod");
 const dotenv_1 = __importDefault(require("dotenv"));
 const path_1 = __importDefault(require("path"));
+const db_1 = require("./db");
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, "../.env") });
 const app = (0, express_1.default)();
+app.use(express_1.default.json());
+//zod validation
+const signupSchema = zod_1.z.object({
+    username: zod_1.z.string().min(3).max(32),
+    email: zod_1.z.string().email(),
+    password: zod_1.z
+        .string()
+        .min(8)
+        .max(20)
+        .regex(/[A-Z]/, "Must include at least one uppercase letter")
+        .regex(/[a-z]/, "Must include at least one lowercase letter")
+        .regex(/[0-9]/, "Must include at least one number")
+        .regex(/[^A-Za-z0-9]/, "Must include at least one special character"),
+});
 // Routes
 app.get('/', (req, res) => {
     res.send("Server working ! Hello from server");
 });
-app.post("/api/v1/signup", (req, res) => {
-    res.send("Signup route");
-});
+app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const result = signupSchema.safeParse(req.body);
+        if (!result.success) {
+            return res.status(411).json({ error: "Invalid input", details: result.error.format() });
+        }
+        const { username, email, password } = result.data;
+        const existingUser = yield db_1.UserModel.findOne({ username });
+        if (existingUser) {
+            return res.status(403).json({ error: "User already exists with this username" });
+        }
+        const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+        yield db_1.UserModel.create({
+            username,
+            email,
+            password: hashedPassword,
+        });
+        return res.status(200).json({ message: "Signed up" });
+    }
+    catch (error) {
+        console.error("Signup Error:", error);
+        return res.status(500).json({ error: "Server error" });
+    }
+}));
 app.post("/api/v1/login", (req, res) => {
     res.send("Login route");
 });
