@@ -5,7 +5,8 @@ import { z } from "zod";
 import dotenv from "dotenv";
 import jwt from 'jsonwebtoken';
 import path from "path";
-import { UserModel } from "./db";
+import { ContentModel, UserModel } from "./db";
+import { userMiddleware } from "./middleware";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") }); 
 
@@ -90,12 +91,33 @@ app.post("/api/v1/login", async (req:any, res:any) => {
   }
 });
 
-app.post("/api/v1/content", (req, res) => {
-  const link=req.body.link;
-  const type=req.body.type;
-  const title=req.body.title;
-  //find user id from middlewares
-    res.send("Content POST route");
+app.post("/api/v1/content",userMiddleware, async (req:any, res:any) => {
+  try{
+    const { link, type, title } = req.body;
+
+    if (!link || !type || !title) {
+      return res.status(411).json({ error: "Missing required fields" });
+    }
+
+  //get user id from middlewares
+  if(!req.userId)
+  {
+    console.log(req.userId)
+    return res.status(411).json({ error: "USERID cannot be fetched from middleare" });
+  }
+  await ContentModel.create({
+        link,
+        type,
+        title,
+        userId: req.userId , // userId is added by the middleware.
+        tags: [] // Initialize tags as an empty array.
+    });
+    res.json({ message: "Content added Successfully" }); // Send success response.
+    }
+    catch (error) {
+    console.error("content addition error:", error);
+    res.status(500).json({ error: "Server error" });
+    }
 });
 
 app.get("/api/v1/content", (req, res) => {

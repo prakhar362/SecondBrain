@@ -20,6 +20,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const path_1 = __importDefault(require("path"));
 const db_1 = require("./db");
+const middleware_1 = require("./middleware");
 dotenv_1.default.config({ path: path_1.default.resolve(__dirname, "../.env") });
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
@@ -83,9 +84,31 @@ app.post("/api/v1/login", (req, res) => __awaiter(void 0, void 0, void 0, functi
         return res.status(403).json({ error: "Wrong email or password" });
     }
 }));
-app.post("/api/v1/content", (req, res) => {
-    res.send("Content POST route");
-});
+app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { link, type, title } = req.body;
+        if (!link || !type || !title) {
+            return res.status(411).json({ error: "Missing required fields" });
+        }
+        //get user id from middlewares
+        if (!req.userId) {
+            console.log(req.userId);
+            return res.status(411).json({ error: "USERID cannot be fetched from middleare" });
+        }
+        yield db_1.ContentModel.create({
+            link,
+            type,
+            title,
+            userId: req.userId, // userId is added by the middleware.
+            tags: [] // Initialize tags as an empty array.
+        });
+        res.json({ message: "Content added Successfully" }); // Send success response.
+    }
+    catch (error) {
+        console.error("content addition error:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+}));
 app.get("/api/v1/content", (req, res) => {
     res.send("Content GET route");
 });
