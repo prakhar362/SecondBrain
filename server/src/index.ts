@@ -1,5 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
+import cors from "cors";
 import bcrypt from 'bcrypt';
 import { z } from "zod";
 import dotenv from "dotenv";
@@ -12,6 +13,14 @@ import { userMiddleware } from "./middleware";
 dotenv.config({ path: path.resolve(__dirname, "../.env") }); 
 
 const app = express();
+// Middleware to parse JSON requests
+app.use(cors({
+    origin: 'http://localhost:5173', // Your frontend URL
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
 app.use(express.json());
 
 //zod validation
