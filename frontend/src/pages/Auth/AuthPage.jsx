@@ -50,12 +50,17 @@ function AuthPage() {
       const endpoint = activeTab === 'signup' ? 'http://localhost:3000/api/v1/signup' : 'http://localhost:3000/api/v1/login'
       const response = await axios.post(endpoint, formData)
 
-      if (response.data.token) {
+      if (response.data.token || response.data.message === "Signed up") {
         localStorage.setItem('token', response.data.token)
         toast.success(activeTab === 'signup' ? 'Account created successfully!' : 'Logged in successfully!', {
-          position: 'top-center',
+          position: "top-right",
           autoClose: 3000,
-          theme: 'dark'
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
         })
         setTimeout(() => {
           navigate('/home')
@@ -63,9 +68,14 @@ function AuthPage() {
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Something went wrong! Please try again.', {
-        position: 'top-center',
+        position: "top-right",
         autoClose: 3000,
-        theme: 'dark'
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
       })
     } finally {
       setLoading(false)
@@ -73,9 +83,9 @@ function AuthPage() {
   }
 
   return (
-    <div className="h-screen relative overflow-hidden bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950">
+    <div className="min-h-screen relative bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-950">
       <ToastContainer
-        position="top-center"
+        position="top-right"
         autoClose={3000}
         hideProgressBar={false}
         newestOnTop={true}
@@ -88,9 +98,9 @@ function AuthPage() {
       />
       {/* Enhanced animated background elements */}
       <div className="absolute inset-0">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-blue-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-pink-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+        <div className="absolute top-0 left-0 w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-96 lg:h-96 bg-blue-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
+        <div className="absolute top-0 right-0 w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-96 lg:h-96 bg-purple-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-0 left-0 w-40 h-40 sm:w-56 sm:h-56 md:w-72 md:h-72 lg:w-96 lg:h-96 bg-pink-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
       {/* Subtle grid pattern overlay */}
@@ -118,9 +128,9 @@ function AuthPage() {
         ))}
       </div>
 
-      <div className="relative z-10 h-screen flex flex-col lg:flex-row">
+      <div className="relative z-10 flex flex-col lg:flex-row">
         {/* Hero Section */}
-        <div className="w-full lg:w-3/5 flex items-center justify-center">
+        <div className="w-full lg:w-3/5 flex items-center justify-center py-8 md:py-12 lg:py-16">
           <div className="text-white text-center lg:text-left max-w-2xl mx-auto px-4">
             <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4 mb-12 border border-white/20 hover:bg-white/15 transition-all duration-300">
               <Brain className="w-6 h-6 text-blue-400" />
@@ -143,7 +153,7 @@ function AuthPage() {
         </div>
 
         {/* Auth Form Section */}
-        <div className="w-full lg:w-2/5 flex items-center justify-center">
+        <div className="w-full lg:w-2/5 flex items-center justify-center py-6 md:py-10 lg:py-12">
           <div className="w-full max-w-md mx-auto px-4">
             <div className="bg-white/5 backdrop-blur-2xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden hover:shadow-blue-500/10 transition-all duration-500">
               <div className="p-8">
@@ -183,7 +193,7 @@ function AuthPage() {
                               onChange={handleInputChange}
                               placeholder="Choose your username" 
                               required
-                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm"
+                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm w-full px-4"
                             />
                           </div>
                           
@@ -197,7 +207,7 @@ function AuthPage() {
                               onChange={handleInputChange}
                               placeholder="Enter your email" 
                               required
-                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm"
+                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm w-full px-4"
                             />
                           </div>
                           
@@ -212,7 +222,7 @@ function AuthPage() {
                                 onChange={handleInputChange}
                                 placeholder="Create a strong password" 
                                 required
-                                className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 pr-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm"
+                                className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 pr-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm w-full px-4"
                               />
                               <button
                                 type="button"
@@ -266,7 +276,7 @@ function AuthPage() {
                               onChange={handleInputChange}
                               placeholder="Enter your email" 
                               required
-                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm"
+                              className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm w-full px-4"
                             />
                           </div>
                           
@@ -281,7 +291,7 @@ function AuthPage() {
                                 onChange={handleInputChange}
                                 placeholder="Enter your password" 
                                 required
-                                className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 pr-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm"
+                                className="bg-white/5 border-white/20 text-white placeholder:text-white/40 focus:border-blue-400 focus:ring-blue-400/30 rounded-xl h-12 pr-12 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm w-full px-4"
                               />
                               <button
                                 type="button"
