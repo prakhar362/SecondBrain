@@ -1,7 +1,7 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   text-align: center;
 }
 
@@ -34,9 +34,63 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 0;
 }
 
 .read-the-docs {
   color: #888;
+}
+
+@keyframes float {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(8px, -8px);
+  }
+  50% {
+    transform: translate(-8px, -12px);
+  }
+  75% {
+    transform: translate(4px, -4px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes float2 {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-6px, -10px);
+  }
+  50% {
+    transform: translate(6px, -8px);
+  }
+  75% {
+    transform: translate(-4px, -4px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes float3 {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(5px, -15px);
+  }
+  50% {
+    transform: translate(-5px, -10px);
+  }
+  75% {
+    transform: translate(3px, -5px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
 }
