@@ -15,8 +15,12 @@ import {
 } from "@/components/ui/sidebar"
 import { Brain, Plus, Share2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
+import CreateContentModal from "@/components/CreateContentModal"
+import { useState } from "react"
 
 export default function Home() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -41,7 +45,12 @@ export default function Home() {
             </Breadcrumb>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="gap-2" 
+              onClick={() => setIsModalOpen(true)}
+            >
               <Plus className="h-4 w-4" />
               Add Content
             </Button>
@@ -60,6 +69,7 @@ export default function Home() {
           <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
         </div>
       </SidebarInset>
+      <CreateContentModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </SidebarProvider>
   )
 }
