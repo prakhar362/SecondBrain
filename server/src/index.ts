@@ -103,31 +103,50 @@ app.post("/api/v1/login", async (req:any, res:any) => {
 
 app.post("/api/v1/content",userMiddleware, async (req:any, res:any) => {
   try{
-    const { link, type, title } = req.body;
+    const { link, type, title, tags } = req.body;
 
     if (!link || !type || !title) {
       return res.status(411).json({ error: "Missing required fields" });
     }
 
-  //get user id from middlewares
-  if(!req.userId)
-  {
-    console.log(req.userId)
-    return res.status(411).json({ error: "USERID cannot be fetched from middleare" });
-  }
-  await ContentModel.create({
-        link,
-        type,
-        title,
-        userId: req.userId , // userId is added by the middleware.
-        tags: [] // Initialize tags as an empty array.
-    });
-    res.json({ message: "Content added Successfully" }); // Send success response.
+    //get user id from middlewares
+    if(!req.userId)
+    {
+      console.log(req.userId)
+      return res.status(411).json({ error: "USERID cannot be fetched from middleare" });
     }
-    catch (error) {
+
+    // Process tags - split by comma and trim whitespace
+    const processedTags = tags ? tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [];
+    console.log("Processed Tags: ", processedTags);
+
+    // Create or find tags and get their ObjectIds
+    const tagIds = await Promise.all(
+      processedTags.map(async (tagName: string) => {
+        // Find existing tag or create new one
+        const tag = await TagModel.findOneAndUpdate(
+          { title: tagName },
+          { title: tagName },
+          { upsert: true, new: true }
+        );
+        return tag._id;
+      })
+    );
+
+    await ContentModel.create({
+      link,
+      type,
+      title,
+      userId: req.userId,
+      tags: tagIds // Store the array of tag ObjectIds
+    });
+
+    res.json({ message: "Content added Successfully" });
+  }
+  catch (error) {
     console.error("content addition error:", error);
     res.status(500).json({ error: "Server error" });
-    }
+  }
 });
 
 app.get("/api/v1/content",userMiddleware, async(req, res) => {

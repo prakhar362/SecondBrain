@@ -95,7 +95,7 @@ app.post("/api/v1/login", (req, res) => __awaiter(void 0, void 0, void 0, functi
 }));
 app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { link, type, title } = req.body;
+        const { link, type, title, tags } = req.body;
         if (!link || !type || !title) {
             return res.status(411).json({ error: "Missing required fields" });
         }
@@ -104,14 +104,23 @@ app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter
             console.log(req.userId);
             return res.status(411).json({ error: "USERID cannot be fetched from middleare" });
         }
+        // Process tags - split by comma and trim whitespace
+        const processedTags = tags ? tags.split(',').map((tag) => tag.trim()).filter(Boolean) : [];
+        console.log("Processed Tags: ", processedTags);
+        // Create or find tags and get their ObjectIds
+        const tagIds = yield Promise.all(processedTags.map((tagName) => __awaiter(void 0, void 0, void 0, function* () {
+            // Find existing tag or create new one
+            const tag = yield db_1.TagModel.findOneAndUpdate({ title: tagName }, { title: tagName }, { upsert: true, new: true });
+            return tag._id;
+        })));
         yield db_1.ContentModel.create({
             link,
             type,
             title,
-            userId: req.userId, // userId is added by the middleware.
-            tags: [] // Initialize tags as an empty array.
+            userId: req.userId,
+            tags: tagIds // Store the array of tag ObjectIds
         });
-        res.json({ message: "Content added Successfully" }); // Send success response.
+        res.json({ message: "Content added Successfully" });
     }
     catch (error) {
         console.error("content addition error:", error);

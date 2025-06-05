@@ -2,7 +2,7 @@ import {model,Schema,Types} from 'mongoose'
 import { object } from 'zod'
 
 
-const contentTypes = ['image', 'video','article', 'audio', 'document','other','social']
+const contentTypes = ['image', 'video','article', 'audio', 'document','other','social','note']
 
 const UserSchema=new Schema({
     username: { type: String, unique: true, required: true },

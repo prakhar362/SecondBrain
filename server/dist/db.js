@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagModel = exports.LinkModel = exports.ContentModel = exports.UserModel = void 0;
 const mongoose_1 = require("mongoose");
-const contentTypes = ['image', 'video', 'article', 'audio', 'document', 'other', 'social'];
+const contentTypes = ['image', 'video', 'article', 'audio', 'document', 'other', 'social', 'note'];
 const UserSchema = new mongoose_1.Schema({
     username: { type: String, unique: true, required: true },
     email: { type: String, unique: true, required: true },

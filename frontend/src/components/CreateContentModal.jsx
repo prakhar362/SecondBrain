@@ -16,12 +16,27 @@ function CreateContentModal({ open, onClose }) {
     type: ''
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // TODO: Handle form submission
-    console.log('FormData',formData);
-
-    onClose();
+    const token = localStorage.getItem('token');
+    
+    try {
+      const res = await axios.post(`${URL}/content`, formData, {
+        headers: {
+          'Authorization': `${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (res.data) {
+        // Handle successful submission
+        console.log('Content created successfully:', res.data);
+        onClose();
+      }
+    } catch (err) {
+      console.error("Content Creation failed:", err);
+      // You might want to show an error message to the user here
+    }
   };
 
   if (!open) return null;
