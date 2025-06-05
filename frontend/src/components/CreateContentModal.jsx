@@ -8,7 +8,7 @@ import { URL } from '@/utils/url';
 import axios from 'axios';
 
 //this is a controlled component
-function CreateContentModal({ open, onClose }) {
+function CreateContentModal({ open, onClose, onContentAdded }) {
   const [formData, setFormData] = useState({
     title: '',
     link: '',
@@ -23,15 +23,14 @@ function CreateContentModal({ open, onClose }) {
     try {
       const res = await axios.post(`${URL}/content`, formData, {
         headers: {
-          'Authorization': `${token}`,
+          'Authorization': token,
           'Content-Type': 'application/json'
         }
       });
       
       if (res.data) {
-        // Handle successful submission
         console.log('Content created successfully:', res.data);
-        onClose();
+        onContentAdded(); // Call the callback after successful creation
       }
     } catch (err) {
       console.error("Content Creation failed:", err);

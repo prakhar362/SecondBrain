@@ -130,7 +130,9 @@ app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter
 app.get("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     //@ts-ignore
     const userId = req.userId;
-    const content = yield db_1.ContentModel.find({ userId: userId }).populate("userId", "username");
+    const content = yield db_1.ContentModel.find({ userId: userId })
+        .populate("userId", "username")
+        .populate("tags", "title"); // Populate tags and only get the title field
     res.send({ content });
 }));
 app.delete("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {

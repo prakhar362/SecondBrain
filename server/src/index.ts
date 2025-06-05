@@ -150,10 +150,11 @@ app.post("/api/v1/content",userMiddleware, async (req:any, res:any) => {
 });
 
 app.get("/api/v1/content",userMiddleware, async(req, res) => {
-
   //@ts-ignore
   const userId=req.userId;
-  const content = await ContentModel.find({ userId: userId }).populate("userId", "username");
+  const content = await ContentModel.find({ userId: userId })
+    .populate("userId", "username")
+    .populate("tags", "title"); // Populate tags and only get the title field
 
     res.send({content});
 });

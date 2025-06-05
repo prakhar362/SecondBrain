@@ -16,10 +16,44 @@ import {
 import { Brain, Plus, Share2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import CreateContentModal from "@/components/CreateContentModal"
-import { useState } from "react"
+import ContentCard from "@/components/ContentCard"
+import { useState, useEffect } from "react"
+import axios from "axios"
+import { URL } from "@/utils/url"
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [contents, setContents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchContents = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      console.log(token);
+      const response = await axios.get(`${URL}/content`, {
+        headers: {
+          'Authorization': token
+        }
+      });
+      setContents(response.data.content);
+      setError(null);
+    } catch (err) {
+      console.error("Error fetching contents:", err);
+      setError("Failed to fetch contents");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchContents();
+  }, []);
+
+  const handleContentAdded = () => {
+    fetchContents(); // Refresh content after adding new content
+    setIsModalOpen(false);
+  };
 
   return (
     <SidebarProvider>
@@ -61,15 +95,32 @@ export default function Home() {
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
-          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-            <div className="bg-muted/50 aspect-video rounded-xl" />
-          </div>
-          <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min" />
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <p>Loading contents...</p>
+            </div>
+          ) : error ? (
+            <div className="flex items-center justify-center h-32 text-red-500">
+              <p>{error}</p>
+            </div>
+          ) : contents.length === 0 ? (
+            <div className="flex items-center justify-center h-32 text-muted-foreground">
+              <p>No contents yet. Add your first content!</p>
+            </div>
+          ) : (
+            <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+              {contents.map((content) => (
+                <ContentCard key={content._id} content={content} />
+              ))}
+            </div>
+          )}
         </div>
       </SidebarInset>
-      <CreateContentModal open={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <CreateContentModal 
+        open={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onContentAdded={handleContentAdded}
+      />
     </SidebarProvider>
   )
 }
