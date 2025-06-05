@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { URL } from '@/utils/url';
+import axios from 'axios';
 
 //this is a controlled component
 function CreateContentModal({ open, onClose }) {
@@ -17,7 +19,8 @@ function CreateContentModal({ open, onClose }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     // TODO: Handle form submission
-    console.log(formData);
+    console.log('FormData',formData);
+
     onClose();
   };
 
