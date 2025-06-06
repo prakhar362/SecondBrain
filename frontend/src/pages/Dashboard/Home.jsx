@@ -30,14 +30,14 @@ export default function Home() {
   const fetchContents = async () => {
     try {
       const token = localStorage.getItem('token');
-      console.log(token);
+      //console.log(token);
       const response = await axios.get(`${URL}/content`, {
         headers: {
           'Authorization': token
         }
       });
       setContents(response.data.content);
-      console.log(response.data);
+      //console.log(response.data);
       setError(null);
     } catch (err) {
       console.error("Error fetching contents:", err);
@@ -54,6 +54,11 @@ export default function Home() {
   const handleContentAdded = () => {
     fetchContents(); // Refresh content after adding new content
     setIsModalOpen(false);
+  };
+
+  const handleDeleteContent = (deletedId) => {
+    //console.log('Item deleted: ',deletedId);
+    fetchContents();
   };
 
   return (
@@ -111,7 +116,11 @@ export default function Home() {
           ) : (
             <div className="grid auto-rows-min gap-4 md:grid-cols-3">
               {contents.map((content) => (
-                <ContentCard key={content._id} content={content} />
+                <ContentCard 
+                  key={content._id} 
+                  content={content} 
+                  onDelete={handleDeleteContent}
+                />
               ))}
             </div>
           )}
