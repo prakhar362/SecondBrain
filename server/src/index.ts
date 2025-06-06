@@ -71,6 +71,15 @@ app.post("/api/v1/signup", async (req:any, res:any) => {
   }
 });
 
+app.post("/api/v1/logout", userMiddleware, async (req:any, res:any) => {
+  try {
+    // The token will be invalidated by removing it from the client
+    res.json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 app.post("/api/v1/login", async (req:any, res:any) => {
   const useremail=req.body.email;

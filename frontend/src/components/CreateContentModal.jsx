@@ -94,10 +94,14 @@ function CreateContentModal({ open, onClose, onContentAdded }) {
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="article">Article</SelectItem>
+                <SelectItem value="image">Image</SelectItem>
                 <SelectItem value="video">Video</SelectItem>
+                <SelectItem value="article">Article</SelectItem>
+                <SelectItem value="audio">Audio</SelectItem>
+                <SelectItem value="document">Document</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+                <SelectItem value="social">Social</SelectItem>
                 <SelectItem value="note">Note</SelectItem>
-                <SelectItem value="bookmark">Bookmark</SelectItem>
               </SelectContent>
             </Select>
           </div>

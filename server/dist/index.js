@@ -74,6 +74,16 @@ app.post("/api/v1/signup", (req, res) => __awaiter(void 0, void 0, void 0, funct
         return res.status(500).json({ error: "Server error" });
     }
 }));
+app.post("/api/v1/logout", middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        // The token will be invalidated by removing it from the client
+        res.json({ message: "Logged out successfully" });
+    }
+    catch (error) {
+        console.error("Logout error:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+}));
 app.post("/api/v1/login", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const useremail = req.body.email;
     const password = req.body.password;

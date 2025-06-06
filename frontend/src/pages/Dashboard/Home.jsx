@@ -37,6 +37,7 @@ export default function Home() {
         }
       });
       setContents(response.data.content);
+      console.log(response.data);
       setError(null);
     } catch (err) {
       console.error("Error fetching contents:", err);

@@ -12,7 +12,10 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { Brain, Twitter, Video, FileText, Link2, Tags } from 'lucide-react'
+import { Brain, Twitter, Video, FileText, Link2, Tags, LogOut } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { URL } from '@/utils/url'
 
 // This is sample data.
 const data = {
@@ -53,8 +56,32 @@ const data = {
 export function AppSidebar({
   ...props
 }) {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res=await axios.post(`${URL}/logout`, {}, {
+        headers: {
+          'Authorization': token
+        }
+      });
+      
+      // Remove token from localStorage
+      localStorage.removeItem('token');
+      console.log("Response from server",res);
+      // Redirect to auth page
+      navigate('/auth');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Even if the server request fails, we should still log the user out locally
+      localStorage.removeItem('token');
+      navigate('/auth');
+    }
+  };
+
   return (
-    (<Sidebar {...props}>
+    (<Sidebar {...props} className="flex flex-col h-full">
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-3">
           <Brain className="w-6 h-6 text-purple-800" />
@@ -62,7 +89,7 @@ export function AppSidebar({
         </div>
         <SearchForm className="pt-1" />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="flex-1 overflow-y-auto">
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
@@ -84,6 +111,16 @@ export function AppSidebar({
         ))}
       </SidebarContent>
       <SidebarRail />
+      {/* Logout Button - Fixed at bottom */}
+      <div className="sticky bottom-0 left-0 right-0 p-2 sm:p-4 bg-background border-t">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors border border-red-200 hover:border-red-300"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </button>
+      </div>
     </Sidebar>)
   );
 }
