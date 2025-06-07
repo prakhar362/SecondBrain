@@ -3,6 +3,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { ToastContainer } from 'react-toastify'
+import { useAuth } from '../../contexts/AuthContext'
 import 'react-toastify/dist/ReactToastify.css'
 import { Button } from "@/components/ui/button"
 import {
@@ -25,6 +26,7 @@ import { Brain, Sparkles, Eye, EyeOff } from 'lucide-react'
 
 function AuthPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [activeTab, setActiveTab] = useState('signup')
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -49,22 +51,55 @@ function AuthPage() {
     try {
       const endpoint = activeTab === 'signup' ? 'http://localhost:3000/api/v1/signup' : 'http://localhost:3000/api/v1/login'
       const response = await axios.post(endpoint, formData)
+      console.log("Response: ", response);
 
-      if (response.data.token || response.data.message === "Signed up") {
-        localStorage.setItem('token', response.data.token)
-        toast.success(activeTab === 'signup' ? 'Account created successfully!' : 'Logged in successfully!', {
+      // For signup, check for success message
+      const isSignupSuccess = activeTab === 'signup' && response.data.message === "Signed up";
+      // For login, check for token
+      const isLoginSuccess = activeTab === 'login' && response.data.token;
+
+      if (isSignupSuccess || isLoginSuccess) {
+        // Show success toast first
+        const successMessage = activeTab === 'signup' 
+          ? 'Account created successfully!'
+          : 'Logged in successfully!';
+        
+        toast.success(successMessage, {
           position: "top-right",
-          autoClose: 3000,
+          autoClose: 2000,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          progress: undefined,
           theme: "dark",
-        })
-        setTimeout(() => {
-          navigate('/home')
-        }, 3000)
+          onClose: () => {
+            // Only update auth state and navigate after toast is closed
+            if (response.data.token) {
+              // Store the token in localStorage
+              localStorage.setItem('token', response.data.token);
+              
+              // Update auth context with user data
+              const userData = {
+                username: formData.username,
+                email: formData.email,
+                token: response.data.token
+              };
+              login(userData);
+              
+              // Navigate to home
+              navigate('/home');
+            } else if (activeTab === 'signup') {
+              // If it's a signup, switch to login tab
+              setActiveTab('login');
+              // Clear form
+              setFormData({
+                username: '',
+                email: '',
+                password: ''
+              });
+            }
+          }
+        });
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Something went wrong! Please try again.', {
