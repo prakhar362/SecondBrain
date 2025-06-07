@@ -125,8 +125,15 @@ app.post("/api/v1/content",userMiddleware, async (req:any, res:any) => {
       return res.status(411).json({ error: "USERID cannot be fetched from middleare" });
     }
 
-    // Process tags - split by comma and trim whitespace
-    const processedTags = tags ? tags.split(',').map((tag: string) => tag.trim()).filter(Boolean) : [];
+    // Process tags - handle both string and array inputs
+    let processedTags:any = [];
+    if (tags) {
+      if (typeof tags === 'string') {
+        processedTags = tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+      } else if (Array.isArray(tags)) {
+        processedTags = tags.map((tag: string) => tag.trim()).filter(Boolean);
+      }
+    }
     console.log("Processed Tags: ", processedTags);
 
     // Create or find tags and get their ObjectIds

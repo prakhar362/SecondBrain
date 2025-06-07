@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { URL } from '@/utils/url';
 import axios from 'axios';
+import { toast } from 'sonner';
 
 //this is a controlled component
-function CreateContentModal({ open, onClose, onContentAdded }) {
+function CreateContentModal({ isOpen, onClose, onContentAdded }) {
   const [formData, setFormData] = useState({
     title: '',
     link: '',
@@ -20,8 +21,15 @@ function CreateContentModal({ open, onClose, onContentAdded }) {
     e.preventDefault();
     const token = localStorage.getItem('token');
     
+    // Format the data for the server
+    const formattedData = {
+      ...formData,
+      // Ensure tags is a string before sending to server
+      tags: formData.tags || '' // Send empty string if no tags
+    };
+    
     try {
-      const res = await axios.post(`${URL}/content`, formData, {
+      const res = await axios.post(`${URL}/content`, formattedData, {
         headers: {
           'Authorization': token,
           'Content-Type': 'application/json'
@@ -29,22 +37,30 @@ function CreateContentModal({ open, onClose, onContentAdded }) {
       });
       
       if (res.data) {
-        console.log('Content created successfully:', res.data);
-        onContentAdded(); // Call the callback after successful creation
+        toast.success('Content created successfully!');
+        // Reset form
+        setFormData({
+          title: '',
+          link: '',
+          tags: '',
+          type: ''
+        });
+        onClose(); // Close the modal
+        onContentAdded(); // Refresh the content list
       }
     } catch (err) {
       console.error("Content Creation failed:", err);
-      // You might want to show an error message to the user here
+      toast.error(err.response?.data?.error || "Failed to create content");
     }
   };
 
-  if (!open) return null;
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+      <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Add New Content</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Add New Content</h2>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
@@ -99,19 +115,19 @@ function CreateContentModal({ open, onClose, onContentAdded }) {
                 <SelectItem value="article">Article</SelectItem>
                 <SelectItem value="audio">Audio</SelectItem>
                 <SelectItem value="document">Document</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
                 <SelectItem value="social">Social</SelectItem>
                 <SelectItem value="note">Note</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex justify-end gap-2 mt-6">
+          <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              Add Content
+            <Button type="submit" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+              Create Content
             </Button>
           </div>
         </form>

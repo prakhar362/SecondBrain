@@ -114,8 +114,16 @@ app.post("/api/v1/content", middleware_1.userMiddleware, (req, res) => __awaiter
             console.log(req.userId);
             return res.status(411).json({ error: "USERID cannot be fetched from middleare" });
         }
-        // Process tags - split by comma and trim whitespace
-        const processedTags = tags ? tags.split(',').map((tag) => tag.trim()).filter(Boolean) : [];
+        // Process tags - handle both string and array inputs
+        let processedTags = [];
+        if (tags) {
+            if (typeof tags === 'string') {
+                processedTags = tags.split(',').map((tag) => tag.trim()).filter(Boolean);
+            }
+            else if (Array.isArray(tags)) {
+                processedTags = tags.map((tag) => tag.trim()).filter(Boolean);
+            }
+        }
         console.log("Processed Tags: ", processedTags);
         // Create or find tags and get their ObjectIds
         const tagIds = yield Promise.all(processedTags.map((tagName) => __awaiter(void 0, void 0, void 0, function* () {
