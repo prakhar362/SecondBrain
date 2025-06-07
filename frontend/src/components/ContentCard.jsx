@@ -40,7 +40,7 @@ import { URL } from "@/utils/url";
 import Home from "@/pages/Dashboard/Home";
 import { toast } from "sonner";
 
-const FRONTEND_URL = "http://localhost:5173"; // Frontend URL for sharing
+const FRONTEND_URL = "https://neuronest-lemon.vercel.app"; // Frontend URL for sharing
 
 const tagColors = [
   "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
