@@ -49,7 +49,7 @@ function AuthPage() {
     setLoading(true)
 
     try {
-      const endpoint = activeTab === 'signup' ? 'http://localhost:3000/api/v1/signup' : 'http://localhost:3000/api/v1/login'
+      const endpoint = activeTab === 'signup' ? 'https://secondbrain-n4fe.onrender.com/api/v1/signup' : 'https://secondbrain-n4fe.onrender.com/api/v1/login'
       const response = await axios.post(endpoint, formData)
       console.log("Response: ", response);
 
