@@ -239,7 +239,10 @@ app.get("/api/v1/brain/share/:hash", async (req:any, res:any) => {
       return res.status(404).json({ error: "Invalid or expired link" });
     }
 
-    const content = await ContentModel.findOne({ _id: link.contentId });
+    const content = await ContentModel.findOne({ _id: link.contentId })
+      .populate("userId", "username")  // Populate username from userId
+      .populate("tags", "title");      // Populate tag titles
+
     if (!content) {
       return res.status(404).json({ error: "Content not found" });
     }

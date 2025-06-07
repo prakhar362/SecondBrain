@@ -5,6 +5,7 @@ import {
   FileText,
   PlayCircle,
   Twitter,
+  Copy,
 } from "lucide-react";
 import {
   Card,
@@ -24,11 +25,22 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import axios from "axios";
 import { URL } from "@/utils/url";
 import Home from "@/pages/Dashboard/Home";
 import { toast } from "sonner";
+
+const FRONTEND_URL = "http://localhost:5173"; // Frontend URL for sharing
 
 const tagColors = [
   "bg-gradient-to-r from-blue-500 to-blue-600 text-white",
@@ -41,6 +53,9 @@ const tagColors = [
 export default function ContentCard({ content, onDelete }) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [shareLink, setShareLink] = useState("");
+  const [isSharing, setIsSharing] = useState(false);
 
   const handleDelete = async () => {
     try {
@@ -68,6 +83,79 @@ export default function ContentCard({ content, onDelete }) {
     } finally {
       setIsDeleting(false);
       setIsDeleteDialogOpen(false);
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      setIsSharing(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`${URL}/brain/share`, {
+        contentId: content._id,
+        share: true
+      }, {
+        headers: {
+          'Authorization': token
+        }
+      });
+
+      const shareableLink = `${FRONTEND_URL}/shared/${response.data.hash}`;
+      setShareLink(shareableLink);
+      setIsShareDialogOpen(true);
+    } catch (error) {
+      console.error("Share error:", error);
+      toast.error(error.response?.data?.error || "Failed to share content");
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const handleUnshare = async () => {
+    try {
+      setIsSharing(true);
+      const token = localStorage.getItem('token');
+      await axios.post(`${URL}/brain/share`, {
+        contentId: content._id,
+        share: false
+      }, {
+        headers: {
+          'Authorization': token
+        }
+      });
+      
+      setShareLink("");
+      setIsShareDialogOpen(false);
+      toast.success("Content unshared successfully");
+    } catch (error) {
+      console.error("Unshare error:", error);
+      toast.error(error.response?.data?.error || "Failed to unshare content");
+    } finally {
+      setIsSharing(false);
+    }
+  };
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      toast.success("Shareable link copied to clipboard!", {
+        duration: 2000,
+        position: "bottom-center",
+        style: {
+          background: "#10B981",
+          color: "white",
+          border: "none",
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to copy link", {
+        duration: 2000,
+        position: "bottom-center",
+        style: {
+          background: "#EF4444",
+          color: "white",
+          border: "none",
+        },
+      });
     }
   };
 
@@ -105,7 +193,10 @@ export default function ContentCard({ content, onDelete }) {
               </div>
             </div>
             <div className="flex items-center gap-2 ml-2">
-              <div className="p-1.5 rounded-lg bg-background/50 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-200 cursor-pointer group-hover:scale-110">
+              <div 
+                className="p-1.5 rounded-lg bg-background/50 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-200 cursor-pointer group-hover:scale-110"
+                onClick={handleShare}
+              >
                 <Share2 className="h-4 w-4 text-muted-foreground hover:text-purple-600 transition-colors" />
               </div>
               <div 
@@ -157,6 +248,44 @@ export default function ContentCard({ content, onDelete }) {
           </div>
         </CardFooter>
       </Card>
+
+      {/* Share Dialog */}
+      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Content</DialogTitle>
+            <DialogDescription>
+              Share this content with others using the link below.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex items-center gap-2 p-4 bg-muted rounded-lg">
+            <input
+              type="text"
+              value={shareLink}
+              readOnly
+              className="flex-1 bg-transparent border-none outline-none text-sm font-mono"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={copyToClipboard}
+              className="hover:bg-background transition-colors"
+              title="Copy to clipboard"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="destructive"
+              onClick={handleUnshare}
+              disabled={isSharing}
+            >
+              {isSharing ? "Unsharing..." : "Unshare"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
