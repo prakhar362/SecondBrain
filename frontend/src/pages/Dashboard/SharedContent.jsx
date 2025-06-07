@@ -81,7 +81,7 @@ export default function SharedContent() {
           
           <Brain className="w-8 h-8 text-purple-400 animate-pulse" />
           <Link to="/">
-          <span className="text-xl font-bold text-white">Second Brain</span>
+          <span className="text-xl font-bold text-white">NeuroNest</span>
           </Link>
         </div>
         <Link to="/auth">

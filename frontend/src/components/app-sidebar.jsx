@@ -113,7 +113,7 @@ export function AppSidebar({
       <SidebarHeader>
         <div className="flex items-center gap-2 px-4 py-3">
           <Brain className="w-6 h-6 text-purple-800" />
-          <span className="font-semibold">Second Brain</span>
+          <span className="font-semibold">NeuroNest</span>
         </div>
         <SearchForm className="pt-1" />
       </SidebarHeader>

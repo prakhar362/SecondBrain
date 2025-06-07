@@ -22,7 +22,7 @@ function LandingPage() {
       <nav className="relative z-10 flex justify-between items-center p-6 lg:px-12 backdrop-blur-sm bg-black/10 border-b border-purple-500/20">
         <div className="flex items-center space-x-2 animate-fade-in">
           <Brain className="w-8 h-8 text-purple-400 animate-pulse" />
-          <span className="text-xl font-bold text-white">Second Brain</span>
+          <span className="text-xl font-bold text-white">NeuroNest</span>
         </div>
         <div className="flex items-center space-x-4 animate-fade-in">
           <Link to="/auth">
@@ -122,7 +122,7 @@ function LandingPage() {
             </div>
           </div>
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">
-            Why Choose Second Brain?
+            Why Choose NeuroNest?
           </h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
             Experience the future of knowledge management with features designed for modern thinkers and teams.
@@ -230,7 +230,7 @@ function LandingPage() {
                 </div>
               </div>
               <h4 className="text-2xl font-bold text-white mb-4">Ready to get started?</h4>
-              <p className="text-gray-300 mb-6">Join thousands of knowledge workers who've already transformed their thinking with Second Brain.</p>
+              <p className="text-gray-300 mb-6">Join thousands of knowledge workers who've already transformed their thinking with NeuroNest.</p>
               
               {/* User avatars instead of numbers */}
               <div className="flex justify-center mb-6">
@@ -268,7 +268,7 @@ function LandingPage() {
       <div className="relative z-10 container mx-auto px-6 lg:px-12 py-20">
         <div className="text-center mb-16 animate-fade-in">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-6">Loved by thousands</h2>
-          <p className="text-xl text-gray-300">See what our users are saying about Second Brain</p>
+          <p className="text-xl text-gray-300">See what our users are saying about NeuroNest</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -315,7 +315,7 @@ function LandingPage() {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <Brain className="w-6 h-6 text-purple-400" />
-                <span className="text-lg font-semibold text-white">Second Brain</span>
+                <span className="text-lg font-semibold text-white">NeuroNest</span>
               </div>
               <p className="text-gray-400 mb-4 max-w-md">
                 Transform your thinking with AI-powered knowledge management. Capture, connect, and discover insights like never before.
@@ -356,7 +356,7 @@ function LandingPage() {
           
           <div className="border-t border-purple-500/20 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
             <p className="text-gray-400 text-center md:text-left">
-              © 2024 Second Brain. All rights reserved.
+              © 2024 NeuroNest. All rights reserved.
             </p>
             <p className="text-gray-400 text-center md:text-right mt-4 md:mt-0">
               Made with ❤️ by Prakhar Shrivastava for knowledge workers everywhere 

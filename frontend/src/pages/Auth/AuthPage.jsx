@@ -174,7 +174,7 @@ function AuthPage() {
             </div>
             
             <h1 className="text-6xl lg:text-8xl font-bold mb-8 bg-gradient-to-r from-white via-blue-200 to-purple-300 bg-clip-text text-transparent leading-tight">
-              Second Brain
+              NeuroNest
             </h1>
             
             <p className="text-xl lg:text-2xl mb-6 text-blue-100 leading-relaxed font-light">
