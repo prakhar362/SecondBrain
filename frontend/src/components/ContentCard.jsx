@@ -34,7 +34,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import axios from "axios";
 import { URL } from "@/utils/url";
 import Home from "@/pages/Dashboard/Home";
@@ -56,6 +56,41 @@ export default function ContentCard({ content, onDelete }) {
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const [shareLink, setShareLink] = useState("");
   const [isSharing, setIsSharing] = useState(false);
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
+  const [imageUrl, setImageUrl] = useState(null);
+
+  // Check if the content has a link and fetch the image
+  useEffect(() => {
+    const fetchImage = async () => {
+      if (content?.link) {
+        try {
+          const url = content.link;
+          
+          setIsLoadingImage(true);
+          const response = await axios.get(
+            `https://api.microlink.io/?url=${encodeURIComponent(url)}`
+          );
+          console.log("Thumbnail url recived: ",response.data?.data?.image?.url);
+          setImageUrl(response.data?.data?.image?.url || null);
+        } catch (error) {
+          console.error("Error fetching link preview:", error);
+          setImageUrl(null);
+        } finally {
+          setIsLoadingImage(false);
+        }
+      } else {
+        setImageUrl(null);
+      }
+    };
+
+    fetchImage();
+    
+    // Cleanup function to reset state when component unmounts or content changes
+    return () => {
+      setImageUrl(null);
+      setIsLoadingImage(false);
+    };
+  }, [content]);
 
   const handleDelete = async () => {
     try {
@@ -179,20 +214,39 @@ export default function ContentCard({ content, onDelete }) {
 
   return (
     <>
-      <Card className="w-full max-w-sm bg-gradient-to-br from-card to-card/50 border border-border/50 shadow-lg rounded-2xl transition-all duration-300 hover:shadow-xl hover:scale-[1.02] hover:border-purple-400/40 backdrop-blur-sm group">
-        <CardHeader className="pb-4">
-          <div className="flex justify-between items-start">
-            <div className="flex items-start gap-3 flex-1">
-              <div className="bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 p-2 rounded-xl">
-                {renderIcon(content.type)}
+      <Card className="w-full max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow-lg rounded-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.01]">
+        {content?.link && (
+          <div className="w-full h-48 overflow-hidden bg-gray-100 dark:bg-gray-700">
+            {isLoadingImage ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="animate-pulse">Loading preview...</div>
               </div>
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-lg font-bold text-foreground line-clamp-2 leading-tight">
-                  {content.title}
-                </CardTitle>
+            ) : imageUrl ? (
+              <img 
+                src={imageUrl} 
+                alt="Link preview" 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  setImageUrl(null);
+                }}
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
+                <LinkIcon className="h-12 w-12 text-gray-400" />
               </div>
+            )}
+          </div>
+        )}
+        <CardHeader className="p-4 border-b border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              {renderIcon(content.type)}
+              <CardTitle className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                {content.title || 'Untitled'}
+              </CardTitle>
             </div>
-            <div className="flex items-center gap-2 ml-2">
+            <div className="flex items-center space-x-2">
               <div 
                 className="p-1.5 rounded-lg bg-background/50 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-all duration-200 cursor-pointer group-hover:scale-110"
                 onClick={handleShare}
