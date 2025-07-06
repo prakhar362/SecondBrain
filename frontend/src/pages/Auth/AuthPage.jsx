@@ -35,6 +35,23 @@ function AuthPage() {
     password: ''
   })
   const [loading, setLoading] = useState(false)
+  const [passwordError, setPasswordError] = useState("")
+
+  const validatePassword = (password) => {
+    if (!/[A-Z]/.test(password)) {
+      return "Must include at least one uppercase letter";
+    }
+    if (!/[a-z]/.test(password)) {
+      return "Must include at least one lowercase letter";
+    }
+    if (!/[0-9]/.test(password)) {
+      return "Must include at least one number";
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      return "Must include at least one special character";
+    }
+    return "";
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -42,10 +59,30 @@ function AuthPage() {
       ...prev,
       [name]: value
     }))
+    if (activeTab === 'signup' && name === 'password') {
+      setPasswordError(validatePassword(value));
+    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    if (activeTab === 'signup') {
+      const error = validatePassword(formData.password);
+      setPasswordError(error);
+      if (error) {
+        toast.error(error, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+        return;
+      }
+    }
     setLoading(true)
 
     try {
@@ -267,6 +304,9 @@ function AuthPage() {
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                               </button>
                             </div>
+                            {activeTab === 'signup' && passwordError && (
+                              <div className="text-red-400 text-xs mt-1">{passwordError}</div>
+                            )}
                           </div>
                         </CardContent>
                         
